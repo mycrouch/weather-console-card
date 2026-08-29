@@ -1,5 +1,5 @@
 /*
- * Weather Station Card
+ * Weather Console Card
  * A Home Assistant Lovelace card laid out like a home weather console:
  * indoor + outdoor temp/humidity, wind compass, feels-like index, barometer,
  * rain and a forecast icon.
@@ -19,17 +19,17 @@
 // this resource as a classic script would otherwise throw on the top-level
 // const declarations before the customElements guards below are reached.
 (() => {
-const WSC_VERSION = "1.4.2";
+const WCC_VERSION = "1.5.0";
 
 console.info(
-  `%c WEATHER-STATION-CARD %c v${WSC_VERSION} `,
+  `%c WEATHER-CONSOLE-CARD %c v${WCC_VERSION} `,
   "color:#fff;background:#333;font-weight:700;border-radius:3px 0 0 3px;padding:2px 4px",
   "color:#333;background:#ccc;font-weight:700;border-radius:0 3px 3px 0;padding:2px 4px"
 );
 
 /* Escape freeform text before it goes into innerHTML: the card title from the
    config, and state values / units read off the entities. */
-const wscEsc = (v) =>
+const wccEsc = (v) =>
   String(v ?? "")
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
@@ -38,7 +38,7 @@ const wscEsc = (v) =>
     .replace(/'/g, "&#39;");
 
 /* ---- MDI icon paths (Apache-2.0, Pictogrammers) ------------------------- */
-const WSC_MDI = {
+const WCC_MDI = {
   "weather-sunny":
     "M12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,2L14.39,5.42C13.65,5.15 12.84,5 12,5C11.16,5 10.35,5.15 9.61,5.42L12,2M3.34,7L7.5,6.65C6.9,7.16 6.36,7.78 5.94,8.5C5.5,9.24 5.25,10 5.11,10.79L3.34,7M3.36,17L5.12,13.23C5.26,14 5.53,14.78 5.95,15.5C6.37,16.24 6.91,16.86 7.5,17.37L3.36,17M20.65,7L18.88,10.79C18.74,10 18.47,9.23 18.05,8.5C17.63,7.78 17.1,7.15 16.5,6.64L20.65,7M20.64,17L16.5,17.36C17.09,16.85 17.62,16.22 18.04,15.5C18.46,14.77 18.73,14 18.87,13.21L20.64,17M12,22L9.59,18.56C10.33,18.83 11.14,19 12,19C12.82,19 13.63,18.83 14.37,18.56L12,22Z",
   "weather-partly-cloudy":
@@ -60,7 +60,7 @@ const WSC_MDI = {
 };
 
 /* weather.<state>  ->  MDI icon key */
-const WSC_FORECAST_ICON = {
+const WCC_FORECAST_ICON = {
   "clear-night": "weather-night",
   cloudy: "weather-cloudy",
   fog: "weather-fog",
@@ -78,7 +78,7 @@ const WSC_FORECAST_ICON = {
   exceptional: "weather-cloudy",
 };
 
-const WSC_DOW = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const WCC_DOW = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 const DEFAULTS = {
   style: "custom", // basic | theme | custom
@@ -87,19 +87,19 @@ const DEFAULTS = {
   forecast_days: 5,
   bg_from: "#d9ecff", // matches sensibo-thermostat-card pastel "cool" gradient
   bg_to: "#aed4f2",
-  indoor_temp_entity: "climate.dining_room_sensibo_living_area",
+  indoor_temp_entity: "",
   indoor_temp_attribute: "current_temperature",
-  indoor_humidity_entity: "climate.dining_room_sensibo_living_area",
+  indoor_humidity_entity: "",
   indoor_humidity_attribute: "current_humidity",
-  outdoor_temp_entity: "sensor.ibrisb3665_temperature",
-  outdoor_humidity_entity: "sensor.ibrisb3665_relative_humidity",
-  wind_speed_entity: "sensor.ibrisb3665_wind_speed",
-  wind_dir_entity: "sensor.ibrisb3665_wind_direction_degrees",
-  wind_cardinal_entity: "sensor.ibrisb3665_wind_direction_cardinal",
-  feels_like_entity: "sensor.ibrisb3665_heat_index",
-  pressure_entity: "sensor.ibrisb3665_pressure",
-  rain_entity: "sensor.ibrisb3665_precipitation_today",
-  forecast_entity: "weather.forecast_home",
+  outdoor_temp_entity: "",
+  outdoor_humidity_entity: "",
+  wind_speed_entity: "",
+  wind_dir_entity: "",
+  wind_cardinal_entity: "",
+  feels_like_entity: "",
+  pressure_entity: "",
+  rain_entity: "",
+  forecast_entity: "",
 };
 
 /* Back-compat: earlier releases named the styles default / manual. */
@@ -111,7 +111,7 @@ function migrateConfig(config) {
 }
 
 const svgIcon = (key, cls) =>
-  `<svg class="${cls || ""}" viewBox="0 0 24 24"><path d="${WSC_MDI[key] || ""}"/></svg>`;
+  `<svg class="${cls || ""}" viewBox="0 0 24 24"><path d="${WCC_MDI[key] || ""}"/></svg>`;
 
 function rgbOf(hex) {
   let h = (hex || "").replace("#", "");
@@ -126,7 +126,7 @@ function idealInk(hex) {
 }
 
 /* ===================================================================== */
-class WeatherStationCard extends HTMLElement {
+class WeatherConsoleCard extends HTMLElement {
   setConfig(config) {
     this._config = migrateConfig(config);
     this._built = false;
@@ -298,18 +298,18 @@ class WeatherStationCard extends HTMLElement {
     const rain = this._read(c.rain_entity);
 
     this._panel.innerHTML = `
-      ${c.title ? `<div class="title">${wscEsc(c.title)}</div>` : ""}
+      ${c.title ? `<div class="title">${wccEsc(c.title)}</div>` : ""}
       <div class="grid">
 
         <!-- IN -->
         <div class="cell in" data-e="${c.indoor_temp_entity}">
           <span class="tag">IN</span>
           <div class="reading">
-            <span class="big">${wscEsc(inT.value)}</span><span class="unit">${wscEsc(inT.unit)}</span>
+            <span class="big">${wccEsc(inT.value)}</span><span class="unit">${wccEsc(inT.unit)}</span>
           </div>
           <div class="sub">
             ${svgIcon("water-percent", "face")}
-            <span class="mid">${wscEsc(inH.value)}</span><span class="unit sm">%</span>
+            <span class="mid">${wccEsc(inH.value)}</span><span class="unit sm">%</span>
           </div>
         </div>
 
@@ -323,11 +323,11 @@ class WeatherStationCard extends HTMLElement {
         <div class="cell out" data-e="${c.outdoor_temp_entity}">
           <span class="tag">OUT</span>
           <div class="reading">
-            <span class="big">${wscEsc(outT.value)}</span><span class="unit">${wscEsc(outT.unit)}</span>
+            <span class="big">${wccEsc(outT.value)}</span><span class="unit">${wccEsc(outT.unit)}</span>
           </div>
           <div class="sub">
             ${svgIcon("water-percent", "face")}
-            <span class="mid">${wscEsc(outH.value)}</span><span class="unit sm">%</span>
+            <span class="mid">${wccEsc(outH.value)}</span><span class="unit sm">%</span>
           </div>
         </div>
 
@@ -342,7 +342,7 @@ class WeatherStationCard extends HTMLElement {
           <span class="tag">INDEX</span>
           <div class="feels">FEELS LIKE</div>
           <div class="reading center">
-            <span class="big">${wscEsc(feels.value)}</span><span class="unit">${wscEsc(feels.unit)}</span>
+            <span class="big">${wccEsc(feels.value)}</span><span class="unit">${wccEsc(feels.unit)}</span>
           </div>
         </div>
 
@@ -350,11 +350,11 @@ class WeatherStationCard extends HTMLElement {
         <div class="cell metrics">
           <span class="tag">BARO</span>
           <div class="metric baroval" data-e="${c.pressure_entity}">
-            <span class="mid">${wscEsc(baro.value)}</span><span class="unit sm">${wscEsc(baro.unit)}</span>
+            <span class="mid">${wccEsc(baro.value)}</span><span class="unit sm">${wccEsc(baro.unit)}</span>
           </div>
           <div class="metric" data-e="${c.rain_entity}">
             <span class="tag sm">RAIN</span>
-            <div><span class="mid">${wscEsc(rain.value)}</span><span class="unit sm">${wscEsc(rain.unit || "mm")}</span></div>
+            <div><span class="mid">${wccEsc(rain.value)}</span><span class="unit sm">${wccEsc(rain.unit || "mm")}</span></div>
           </div>
         </div>
       </div>
@@ -391,14 +391,14 @@ class WeatherStationCard extends HTMLElement {
           <path d="M50 12 L45 26 L50 22 L55 26 Z" class="carrow"/>
         </g>
         <text x="50" y="47" class="cavg">AVG</text>
-        <text x="50" y="62" class="cspeed">${wscEsc(speed)}</text>
-        <text x="50" y="72" class="cunit">${wscEsc(unit || "")}</text>
+        <text x="50" y="62" class="cspeed">${wccEsc(speed)}</text>
+        <text x="50" y="72" class="cunit">${wccEsc(unit || "")}</text>
       </svg>`;
   }
 
   _forecast(entity) {
     const st = this._hass.states[entity];
-    const key = st ? WSC_FORECAST_ICON[st.state] || "weather-partly-cloudy" : "weather-partly-cloudy";
+    const key = st ? WCC_FORECAST_ICON[st.state] || "weather-partly-cloudy" : "weather-partly-cloudy";
     return svgIcon(key, "fcicon");
   }
 
@@ -412,8 +412,8 @@ class WeatherStationCard extends HTMLElement {
       .slice(0, n)
       .map((d) => {
         const dt = new Date(d.datetime);
-        const dow = isNaN(dt.getTime()) ? "" : WSC_DOW[dt.getDay()];
-        const icon = WSC_FORECAST_ICON[d.condition] || "weather-partly-cloudy";
+        const dow = isNaN(dt.getTime()) ? "" : WCC_DOW[dt.getDay()];
+        const icon = WCC_FORECAST_ICON[d.condition] || "weather-partly-cloudy";
         const hi = d.temperature != null ? Math.round(d.temperature) + "°" : "—";
         const lo = d.templow != null ? Math.round(d.templow) + "°" : "";
         return `<div class="fcday">
@@ -511,16 +511,16 @@ class WeatherStationCard extends HTMLElement {
   }
 
   static getConfigElement() {
-    return document.createElement("weather-station-card-editor");
+    return document.createElement("weather-console-card-editor");
   }
 
   static getStubConfig() {
-    return { type: "custom:weather-station-card", ...DEFAULTS };
+    return { type: "custom:weather-console-card", ...DEFAULTS };
   }
 }
 
 /* ===================================================================== */
-class WeatherStationCardEditor extends HTMLElement {
+class WeatherConsoleCardEditor extends HTMLElement {
   setConfig(config) {
     this._config = migrateConfig(config);
     if (this._form) this._form.data = this._config;
@@ -540,8 +540,8 @@ class WeatherStationCardEditor extends HTMLElement {
     this._form.computeLabel = (s) =>
       s.label || s.name.replace(/_/g, " ").replace(/\b\w/g, (m) => m.toUpperCase());
     this._form.addEventListener("value-changed", (ev) => {
-      const next = { type: "custom:weather-station-card", ...ev.detail.value };
-      if (JSON.stringify(next) === JSON.stringify({ type: "custom:weather-station-card", ...this._config }))
+      const next = { type: "custom:weather-console-card", ...ev.detail.value };
+      if (JSON.stringify(next) === JSON.stringify({ type: "custom:weather-console-card", ...this._config }))
         return;
       const styleChanged = next.style !== this._config.style;
       this._config = next;
@@ -659,21 +659,21 @@ class WeatherStationCardEditor extends HTMLElement {
 }
 
 /* ===================================================================== */
-if (!customElements.get("weather-station-card")) {
-  customElements.define("weather-station-card", WeatherStationCard);
+if (!customElements.get("weather-console-card")) {
+  customElements.define("weather-console-card", WeatherConsoleCard);
 }
-if (!customElements.get("weather-station-card-editor")) {
-  customElements.define("weather-station-card-editor", WeatherStationCardEditor);
+if (!customElements.get("weather-console-card-editor")) {
+  customElements.define("weather-console-card-editor", WeatherConsoleCardEditor);
 }
 
 window.customCards = window.customCards || [];
-if (!window.customCards.some((c) => c.type === "weather-station-card")) {
+if (!window.customCards.some((c) => c.type === "weather-console-card")) {
   window.customCards.push({
-    type: "weather-station-card",
-    name: "Weather Station Card",
+    type: "weather-console-card",
+    name: "Weather Console Card",
     description: "Weather-console-style card: indoor/outdoor temp & humidity, wind compass, feels-like, baro, rain and forecast. Theme-native with a per-card style picker.",
     preview: true,
-    documentationURL: "https://github.com/mycrouch/weather-station-card",
+    documentationURL: "https://github.com/mycrouch/weather-console-card",
   });
 }
 

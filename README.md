@@ -1,4 +1,4 @@
-# Weather Station Card
+# Weather Console Card
 
 A [Home Assistant](https://www.home-assistant.io/) Lovelace card laid out like a home **weather console**: indoor and outdoor temperature & humidity, a wind compass, feels-like index, barometer, rain, a forecast icon and an optional 5-day forecast — all on a single glanceable panel.
 
@@ -27,25 +27,27 @@ Built as a single self-contained vanilla custom element: no build step, no exter
 - **Tap to drill in** — every value opens the entity's more-info dialog.
 - **GUI editor** — full visual configuration, no YAML required.
 
+> **Renamed in v1.5.0.** This card was previously `weather-station-card`. The name collided with another card of the same name already in the HACS default store, so the repository, the file and the card type are now `weather-console-card`. If you are upgrading, change `type: custom:weather-station-card` to `type: custom:weather-console-card` in your dashboard and re-add the resource under the new filename.
+
 ## Installation
 
 ### HACS (custom repository)
 
 1. HACS → ⋮ → **Custom repositories**.
-2. Add `https://github.com/mycrouch/weather-station-card`, category **Dashboard** (Lovelace).
-3. Install **Weather Station Card**, then hard-refresh the browser.
+2. Add `https://github.com/mycrouch/weather-console-card`, category **Dashboard** (Lovelace).
+3. Install **Weather Console Card**, then hard-refresh the browser.
 
 ### Manual
 
-1. Copy `weather-station-card.js` to `/config/www/`.
-2. Dashboard → ⋮ → **Edit** → ⋮ → **Manage resources** → add `/local/weather-station-card.js` as a **JavaScript module**.
+1. Copy `weather-console-card.js` to `/config/www/`.
+2. Dashboard → ⋮ → **Edit** → ⋮ → **Manage resources** → add `/local/weather-console-card.js` as a **JavaScript module**.
 
 ## Configuration
 
-Add the card from the picker (**Weather Station Card**) and use the visual editor, or configure in YAML.
+Add the card from the picker (**Weather Console Card**) and use the visual editor, or configure in YAML.
 
 ```yaml
-type: custom:weather-station-card
+type: custom:weather-console-card
 indoor_temp_entity: climate.living_area
 indoor_temp_attribute: current_temperature
 indoor_humidity_entity: climate.living_area
@@ -59,8 +61,6 @@ feels_like_entity: sensor.station_heat_index
 pressure_entity: sensor.station_pressure
 rain_entity: sensor.station_precipitation_today
 forecast_entity: weather.forecast_home
-show_moon: true
-show_clock: true
 ```
 
 ### Options
@@ -86,8 +86,6 @@ show_clock: true
 | `forecast_entity` | entity | — | A `weather.*` entity for the forecast icon and the daily forecast row. |
 | `show_forecast` | boolean | `false` | Show the daily forecast strip below the panel. |
 | `forecast_days` | number | `5` | How many days to show in the forecast strip (1–7). |
-| `show_moon` | boolean | `true` | Show the moon-phase glyph. |
-| `show_clock` | boolean | `true` | Show the clock and date. |
 
 Units are taken from each sensor's `unit_of_measurement`, so °C/°F, km/h vs m/s, hPa vs mbar all follow your entities.
 
@@ -105,7 +103,7 @@ These Home Assistant Lovelace cards share a common design language — a clean *
 | --- | --- |
 | [origami-entity-card](https://github.com/mycrouch/origami-entity-card) | Group any device's entities as a row list or chip grid |
 | [pro-v-weather-card](https://github.com/mycrouch/pro-v-weather-card) | Weather-station console — clock, moon, forecast, UV, solar, wind |
-| **weather-station-card** (this card) | LCD-console weather station with backlight themes |
+| **weather-console-card** (this card) | LCD-console weather station with backlight themes |
 | [airtouch-card](https://github.com/mycrouch/airtouch-card) | AirTouch 4/5 AC + zone control |
 | [sensibo-thermostat-card](https://github.com/mycrouch/sensibo-thermostat-card) | Sensibo thermostat with mode-coloured backgrounds |
 | [ecovacs-vacuum-card](https://github.com/mycrouch/ecovacs-vacuum-card) | Ecovacs/Deebot vacuum with area cleaning |
