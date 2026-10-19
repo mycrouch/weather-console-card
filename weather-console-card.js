@@ -19,7 +19,7 @@
 // this resource as a classic script would otherwise throw on the top-level
 // const declarations before the customElements guards below are reached.
 (() => {
-const WCC_VERSION = "1.5.0";
+const WCC_VERSION = "1.5.1";
 
 console.info(
   `%c WEATHER-CONSOLE-CARD %c v${WCC_VERSION} `,

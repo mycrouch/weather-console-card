@@ -20,7 +20,6 @@ Built as a single self-contained vanilla custom element: no build step, no exter
 - **Index, Baro, Rain** — feels-like/heat-index, barometric pressure and rainfall today.
 - **Forecast icon** — mapped from any `weather.*` entity.
 - **Optional 5-day forecast row** — toggle on a daily forecast strip (day, condition icon, high/low) pulled live from the weather entity via the HA forecast websocket API. Configurable number of days (1–7).
-- **Moon phase & clock** — locally computed moon phase plus a live clock and date; both toggleable.
 - **Any entity, any integration** — every reading is a configurable entity slot. Indoor temp/humidity can read a plain sensor **or an attribute** (e.g. a climate entity's `current_temperature` / `current_humidity`), so it works even when your outdoor integration (Weather Underground, etc.) doesn't expose indoor readings.
 - **Three style modes** — **Basic** (inherits theme variables), **Theme** (any installed HA theme applied to just this card), or **Custom** (a gradient; defaults to a soft-blue matching the Sensibo card). Text ink adapts automatically.
 - **Responsive** — everything scales with the card's own width (CSS container queries), so it fits wide layouts and narrow section columns alike; Baro/Rain stack their labels when space is tight.
@@ -92,9 +91,6 @@ Units are taken from each sensor's `unit_of_measurement`, so °C/°F, km/h vs m/
 ## Notes
 
 - Indoor readings default to reading a **climate** entity's `current_temperature` / `current_humidity` attributes — handy when your weather integration has no indoor sensor. Point them at a plain sensor and clear the attribute field to use the state instead.
-- The clock/date use the browser's local time.
-- Moon phase is an approximation (Conway) computed on-device; no sensor required.
-
 ## The mycrouch card collection
 
 These Home Assistant Lovelace cards share a common design language — a clean **default** look that inherits your active theme, plus a per-card **theme** picker — so they sit together neatly on one dashboard. Pair any of them with **gradient-themes** for 40 ready-made gradient and pastel backgrounds.
@@ -111,4 +107,4 @@ These Home Assistant Lovelace cards share a common design language — a clean *
 
 ## License
 
-MIT © Jason Crouch. Weather, moon and comfort glyphs are [Material Design Icons](https://pictogrammers.com/library/mdi/) (Apache 2.0).
+MIT © Jason Crouch. Weather and comfort glyphs are [Material Design Icons](https://pictogrammers.com/library/mdi/) (Apache 2.0).
